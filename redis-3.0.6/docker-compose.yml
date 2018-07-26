@@ -1,0 +1,37 @@
+version: '2.1'
+services:
+  redis306:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${IMAGE_PREFIX:-cirepo}/redis:${IMAGE_TAG:-3.0.6}
+    container_name: ${INSTANCE_NAME:-redis306}.${INSTANCE_DOMAIN:-local}
+    hostname: ${INSTANCE_NAME:-redis306}.${INSTANCE_DOMAIN:-local}
+    networks:
+      local-network:
+        ipv4_address: 172.16.238.54
+        ipv6_address: 2001:3984:3989::54
+    ports:
+    - "${SERVER_PORT:-6379}:6379"
+    volumes:
+    - data:/data
+    command: redis-server --requirepass ${DOCKER_PASSWD:-docker_pass} #remove this line if no password required
+
+networks:
+  local-network:
+    external: true
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+      - subnet: 2001:3984:3989::/64
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data
+      o: bind
