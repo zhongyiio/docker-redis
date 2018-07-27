@@ -25,13 +25,17 @@ RUN set -ex \
      fi \
   && usermod -u 1000  redis \
   && groupmod -g 1000 redis \
-  && chown -hR redis:redis /data
+  && chown -hR redis:redis /data \
+  && if [ -f /entrypoint.sh ]; then ln -s /entrypoint.sh /usr/local/bin/docker-entrypoint.sh; fi
 
 ENV REDIS_VERSION ${IMAGE_ARG_VERSION:-3.0.6}
 VOLUME /data
 WORKDIR /data
 
-ENTRYPOINT ["/entrypoint.sh"]
+# old entrypoint: /entrypoint.sh
+#ENTRYPOINT ["/entrypoint.sh"]
+# new entrypoint: /usr/local/bin/docker-entrypoint.sh
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 6379
 CMD ["redis-server"]
