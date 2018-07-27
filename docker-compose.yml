@@ -1,12 +1,17 @@
 version: '2.1'
 services:
-  redis306:
+  image:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${IMAGE_PREFIX:-cirepo}/redis:${IMAGE_TAG:-3.0.6}
-    container_name: ${INSTANCE_NAME:-redis306}.${INSTANCE_DOMAIN:-local}
-    hostname: ${INSTANCE_NAME:-redis306}.${INSTANCE_DOMAIN:-local}
+      args:
+      - IMAGE_ARG_ALPINE_MIRROR=${IMAGE_ARG_ALPINE_MIRROR:-mirror.tuna.tsinghua.edu.cn}
+      - IMAGE_ARG_IMAGE_TAG=${IMAGE_ARG_IMAGE_TAG:-3.0.6}
+      - IMAGE_ARG_VERSION=${IMAGE_ARG_VERSION:-3.0.6}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass} #remove this line if no password required
+    container_name: ${CONTAINER_HOST_NAME:-redis}
+    hostname: ${CONTAINER_HOST_NAME:-redis}
+    image: ${IMAGE_PREFIX:-cloudready}/${IMAGE_NAME:-redis}:${IMAGE_TAG:-3.0.6-SNAPSHOT}
     networks:
       local-network:
         ipv4_address: 172.16.238.54
@@ -15,7 +20,6 @@ services:
     - "${SERVER_PORT:-6379}:6379"
     volumes:
     - data:/data
-    command: redis-server --requirepass ${DOCKER_PASSWD:-docker_pass} #remove this line if no password required
 
 networks:
   local-network:
