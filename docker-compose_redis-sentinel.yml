@@ -1,5 +1,7 @@
 
 # docker exec redis-sentinel redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
+# docker exec redis-sentinel redis-cli -p 26379 info Sentinel
+# docker exec redis-sentinel redis-cli -p 26379 sentinel slaves mymaster
 
 version: '2.1'
 services:
@@ -7,15 +9,18 @@ services:
     extends:
       file: docker-compose-base.yml
       service: base-redis
-    command: ["redis-server"]
+    command: ["redis-server", "--port", "6379"]
     container_name: ${CONTAINER_HOST_NAME:-redis-master}
+    environment:
+    - SERVER_PORT=6379
     hostname: ${CONTAINER_HOST_NAME:-redis-master}
-    networks:
-      local-network:
-        ipv4_address: 172.16.238.47
-        ipv6_address: 2001:3984:3989::47
+    network_mode: "host"
+#    networks:
+#      local-network:
+#        ipv4_address: 172.16.238.47
+#        ipv6_address: 2001:3984:3989::47
     ports:
-    - "${SERVER_PORT:-6379}:6379"
+    - "6379:6379"
     volumes:
     - data-master:/data
 
@@ -28,18 +33,21 @@ services:
     environment:
     - SENTINEL_DOWN_AFTER=30000
     - SENTINEL_FAILOVER=180000
-    - SENTINEL_MASTER_HOSTORIP=172.16.238.47
+    #- SENTINEL_MASTER_HOSTORIP=redis-master
+    #- SENTINEL_MASTER_HOSTORIP=host.docker.internal
+    - SENTINEL_MASTER_HOSTORIP=127.0.0.1
     - SENTINEL_MASTER_NAME=mymaster
     - SENTINEL_MASTER_PORT=6379
     - SENTINEL_PORT=26379
     - SENTINEL_QUORUM=2
+    - SERVER_PORT=6380
     hostname: ${CONTAINER_HOST_NAME:-redis-sentinel}
-    networks:
-      local-network:
-        ipv4_address: 172.16.238.49
-        ipv6_address: 2001:3984:3989::49
+    network_mode: "host"
+#    networks:
+#      local-network:
+#        ipv4_address: 172.16.238.49
+#        ipv6_address: 2001:3984:3989::49
     ports:
-    - "${SERVER_PORT:-6380}:6379"
     - "${SENTINEL_PORT:-26379}:26379"
     volumes:
     - data-sentinel:/data
@@ -48,29 +56,34 @@ services:
     extends:
       file: docker-compose-base.yml
       service: base-redis
-    command: ["redis-server", "--slaveof", "172.16.238.47", "6379"]
+    #command: ["redis-server", "--slaveof", "redis-master", "6379", "--port", "6381"]
+    #command: ["redis-server", "--slaveof", "host.docker.internal", "6379", "--port", "6381"]
+    command: ["redis-server", "--slaveof", "127.0.0.1", "6379", "--port", "6381"]
     container_name: ${CONTAINER_HOST_NAME:-redis-slave}
+    environment:
+    - SERVER_PORT=6381
     hostname: ${CONTAINER_HOST_NAME:-redis-slave}
-    networks:
-      local-network:
-        ipv4_address: 172.16.238.52
-        ipv6_address: 2001:3984:3989::52
+    network_mode: "host"
+#    networks:
+#      local-network:
+#        ipv4_address: 172.16.238.52
+#        ipv6_address: 2001:3984:3989::52
     ports:
-    - "${SERVER_PORT:-6381}:6379"
+    - "6381:6381"
     volumes:
     - data-slave:/data
 
 
-networks:
-  local-network:
-    external: true
-    driver: bridge
-    enable_ipv6: true
-    ipam:
-      driver: default
-      config:
-      - subnet: 172.16.238.0/24
-      - subnet: 2001:3984:3989::/64
+#networks:
+#  local-network:
+#    external: true
+#    driver: bridge
+#    enable_ipv6: true
+#    ipam:
+#      driver: default
+#      config:
+#      - subnet: 172.16.238.0/24
+#      - subnet: 2001:3984:3989::/64
 
 
 volumes:
