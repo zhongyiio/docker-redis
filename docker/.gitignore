@@ -3,6 +3,8 @@
 
 # But not these files...
 !/.gitignore
+!/entrypoint.sh
+!/etc/redis/*
 # etc...
 
 # ...even if they are in subdirectories

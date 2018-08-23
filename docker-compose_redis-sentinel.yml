@@ -1,0 +1,94 @@
+
+# docker exec redis-sentinel redis-cli -p 26379 SENTINEL get-master-addr-by-name mymaster
+
+version: '2.1'
+services:
+  redis-master:
+    extends:
+      file: docker-compose-base.yml
+      service: base-redis
+    command: ["redis-server"]
+    container_name: ${CONTAINER_HOST_NAME:-redis-master}
+    hostname: ${CONTAINER_HOST_NAME:-redis-master}
+    networks:
+      local-network:
+        ipv4_address: 172.16.238.47
+        ipv6_address: 2001:3984:3989::47
+    ports:
+    - "${SERVER_PORT:-6379}:6379"
+    volumes:
+    - data-master:/data
+
+  redis-sentinel:
+    extends:
+      file: docker-compose-base.yml
+      service: base-redis
+    command: ["redis-server", "/etc/redis/sentinel.conf", "--sentinel"]
+    container_name: ${CONTAINER_HOST_NAME:-redis-sentinel}
+    environment:
+    - SENTINEL_DOWN_AFTER=30000
+    - SENTINEL_FAILOVER=180000
+    - SENTINEL_MASTER_HOSTORIP=172.16.238.47
+    - SENTINEL_MASTER_NAME=mymaster
+    - SENTINEL_MASTER_PORT=6379
+    - SENTINEL_PORT=26379
+    - SENTINEL_QUORUM=2
+    hostname: ${CONTAINER_HOST_NAME:-redis-sentinel}
+    networks:
+      local-network:
+        ipv4_address: 172.16.238.49
+        ipv6_address: 2001:3984:3989::49
+    ports:
+    - "${SERVER_PORT:-6380}:6379"
+    - "${SENTINEL_PORT:-26379}:26379"
+    volumes:
+    - data-sentinel:/data
+
+  redis-slave:
+    extends:
+      file: docker-compose-base.yml
+      service: base-redis
+    command: ["redis-server", "--slaveof", "172.16.238.47", "6379"]
+    container_name: ${CONTAINER_HOST_NAME:-redis-slave}
+    hostname: ${CONTAINER_HOST_NAME:-redis-slave}
+    networks:
+      local-network:
+        ipv4_address: 172.16.238.52
+        ipv6_address: 2001:3984:3989::52
+    ports:
+    - "${SERVER_PORT:-6381}:6379"
+    volumes:
+    - data-slave:/data
+
+
+networks:
+  local-network:
+    external: true
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+      - subnet: 2001:3984:3989::/64
+
+
+volumes:
+  data-master:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/master
+      o: bind
+  data-sentinel:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/sentinel
+      o: bind
+  data-slave:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/data/slave
+      o: bind

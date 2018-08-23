@@ -3,9 +3,6 @@
 
 # But not these files...
 !/.gitignore
-!/master/.gitignore
-!/sentinel/.gitignore
-!/slave/.gitignore
 # etc...
 
 # ...even if they are in subdirectories

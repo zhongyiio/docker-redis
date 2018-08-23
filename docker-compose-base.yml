@@ -1,0 +1,12 @@
+
+version: '2.1'
+services:
+  base-redis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+      - IMAGE_ARG_ALPINE_MIRROR=${IMAGE_ARG_ALPINE_MIRROR:-mirror.tuna.tsinghua.edu.cn}
+      - IMAGE_ARG_IMAGE_TAG=${IMAGE_ARG_IMAGE_TAG:-3.0.6}
+      - IMAGE_ARG_VERSION=${IMAGE_ARG_VERSION:-3.0.6}
+    image: ${IMAGE_PREFIX:-cloudready}/${IMAGE_NAME:-redis}:${IMAGE_TAG:-3.0.6-SNAPSHOT}

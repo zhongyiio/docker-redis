@@ -1,17 +1,13 @@
+
 version: '2.1'
 services:
   image:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-      - IMAGE_ARG_ALPINE_MIRROR=${IMAGE_ARG_ALPINE_MIRROR:-mirror.tuna.tsinghua.edu.cn}
-      - IMAGE_ARG_IMAGE_TAG=${IMAGE_ARG_IMAGE_TAG:-3.0.6}
-      - IMAGE_ARG_VERSION=${IMAGE_ARG_VERSION:-3.0.6}
+    extends:
+      file: docker-compose-base.yml
+      service: base-redis
     command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass} #remove this line if no password required
     container_name: ${CONTAINER_HOST_NAME:-redis}
     hostname: ${CONTAINER_HOST_NAME:-redis}
-    image: ${IMAGE_PREFIX:-cloudready}/${IMAGE_NAME:-redis}:${IMAGE_TAG:-3.0.6-SNAPSHOT}
     networks:
       local-network:
         ipv4_address: 172.16.238.54

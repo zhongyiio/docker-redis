@@ -12,7 +12,12 @@ ARG IMAGE_ARG_VERSION
 
 COPY --from=base / /
 
+COPY --chown=1000:1000 docker /
+
 RUN set -ex \
+  && echo "/entrypoint.sh" \
+  && cat /entrypoint.sh \
+  && chmod 755 /entrypoint.sh \
   && if [ -f /etc/alpine-release ] && [[ $(cat /etc/alpine-release | awk -F. '{print $1"."$2}') == "3.3" ]]; then echo "http://${IMAGE_ARG_ALPINE_MIRROR:-dl-cdn.alpinelinux.org}/alpine/edge/community/" >> /etc/apk/repositories; fi \
   && if [ -f /etc/alpine-release ]; then \
        echo IMAGE_ARG_ALPINE_MIRROR ${IMAGE_ARG_ALPINE_MIRROR}; \
@@ -25,17 +30,13 @@ RUN set -ex \
      fi \
   && usermod -u 1000  redis \
   && groupmod -g 1000 redis \
-  && chown -hR redis:redis /data \
-  && if [ -f /entrypoint.sh ]; then ln -s /entrypoint.sh /usr/local/bin/docker-entrypoint.sh; fi
+  && chown -hR redis:redis /data
 
 ENV REDIS_VERSION ${IMAGE_ARG_VERSION:-3.0.6}
 VOLUME /data
 WORKDIR /data
 
-# old entrypoint: /entrypoint.sh
-#ENTRYPOINT ["/entrypoint.sh"]
-# new entrypoint: /usr/local/bin/docker-entrypoint.sh
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
 
 EXPOSE 6379
 CMD ["redis-server"]
