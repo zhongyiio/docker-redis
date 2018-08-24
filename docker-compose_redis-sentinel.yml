@@ -11,8 +11,6 @@ services:
       service: base-redis
     command: ["redis-server", "--port", "6379"]
     container_name: ${CONTAINER_HOST_NAME:-redis-master}
-    environment:
-    - SERVER_PORT=6379
     hostname: ${CONTAINER_HOST_NAME:-redis-master}
     network_mode: "host"
 #    networks:
@@ -40,7 +38,6 @@ services:
     - SENTINEL_MASTER_PORT=6379
     - SENTINEL_PORT=26379
     - SENTINEL_QUORUM=2
-    - SERVER_PORT=6380
     hostname: ${CONTAINER_HOST_NAME:-redis-sentinel}
     network_mode: "host"
 #    networks:
@@ -60,8 +57,6 @@ services:
     #command: ["redis-server", "--slaveof", "host.docker.internal", "6379", "--port", "6381"]
     command: ["redis-server", "--slaveof", "127.0.0.1", "6379", "--port", "6381"]
     container_name: ${CONTAINER_HOST_NAME:-redis-slave}
-    environment:
-    - SERVER_PORT=6381
     hostname: ${CONTAINER_HOST_NAME:-redis-slave}
     network_mode: "host"
 #    networks:
