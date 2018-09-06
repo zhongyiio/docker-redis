@@ -8,10 +8,6 @@ services:
     command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass} #remove this line if no password required
     container_name: ${CONTAINER_HOST_NAME:-redis}
     hostname: ${CONTAINER_HOST_NAME:-redis}
-    networks:
-      local-network:
-        ipv4_address: 172.16.238.54
-        ipv6_address: 2001:3984:3989::54
     ports:
     - "${SERVER_PORT:-6379}:6379"
     volumes:
