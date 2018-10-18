@@ -19,6 +19,7 @@ services:
 #        ipv6_address: 2001:3984:3989::47
     ports:
     - "6379:6379"
+    restart: always
     volumes:
     - data-master:/data
 
@@ -46,6 +47,7 @@ services:
 #        ipv6_address: 2001:3984:3989::49
     ports:
     - "${SENTINEL_PORT:-26379}:26379"
+    restart: always
     volumes:
     - data-sentinel:/data
 
@@ -65,6 +67,7 @@ services:
 #        ipv6_address: 2001:3984:3989::52
     ports:
     - "6381:6381"
+    restart: always
     volumes:
     - data-slave:/data
 

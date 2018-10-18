@@ -14,6 +14,7 @@ services:
         #ipv6_address: 2001:3984:3989::54
     ports:
     - "${SERVER_PORT:-6379}:6379"
+    restart: always
     volumes:
     - data:/data
 
