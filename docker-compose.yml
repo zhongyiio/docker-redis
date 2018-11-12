@@ -6,14 +6,22 @@ services:
       file: docker-compose-base.yml
       service: base-redis
     command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass} #remove this line if no password required
-    container_name: ${CONTAINER_HOST_NAME:-redis}
-    hostname: ${CONTAINER_HOST_NAME:-redis}
+    container_name: ${CONTAINER_HOST_NAME:-standalone.redis}
+    hostname: ${CONTAINER_HOST_NAME:-standalone.redis}
+    labels:
+      deploy.config.commit: ${LABEL_DEPLOY_CONFIG_COMMIT:-unknown}
+      deploy.config.name: ${LABEL_DEPLOY_CONFIG_NAME:-unknown}
+      deploy.config.ref: ${LABEL_DEPLOY_CONFIG_REF:-unknown}
+      deploy.util.commit: ${LABEL_DEPLOY_UTIL_COMMIT:-unknown}
+      deploy.util.ref: ${LABEL_DEPLOY_UTIL_REF:-unknown}
+      instance.name.short: ${LABEL_INSTANCE_NAME_SHORT:-standalone.redis}
+      instance.name: ${LABEL_INSTANCE_NAME:-127.0.0.1/redis/standalone}
     networks:
       local-network:
-        ipv4_address: 172.16.238.54
-        #ipv6_address: 2001:3984:3989::54
+        ipv4_address: ${IPV4_ADDRESS:-172.16.238.54}
+        #ipv6_address: ${IPV6_ADDRESS:-2001:3984:3989::54}
     ports:
-    - "${SERVER_PORT:-6379}:6379"
+    - "${EXTERNAL_REDIS_6379_PORT:-6379}:6379"
     restart: always
     volumes:
     - data:/data
